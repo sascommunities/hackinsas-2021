@@ -1,0 +1,206 @@
+{
+	"info": {
+		"_postman_id": "8b2ca8f0-d84e-47cf-b58c-96faab578d42",
+		"name": "Authentication #HackinSAS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get access token to register client",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"pm.environment.set(\"client_access_token\", jsonData.access_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Consul-Token",
+						"value": "{{consul-token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{sasserver}}/SASLogon/oauth/clients/consul?callback=false&serviceId={{clientid}}",
+					"host": [
+						"{{sasserver}}"
+					],
+					"path": [
+						"SASLogon",
+						"oauth",
+						"clients",
+						"consul"
+					],
+					"query": [
+						{
+							"key": "callback",
+							"value": "false"
+						},
+						{
+							"key": "serviceId",
+							"value": "{{clientid}}"
+						}
+					]
+				},
+				"description": "Use the SAS Viya configuration server's Consul token to obtain an Access Token to register a new Client ID."
+			},
+			"response": []
+		},
+		{
+			"name": "Register client",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{client_access_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"client_id\": \"{{clientid}}\", \r\n        \"client_secret\": \"{{clientsecret}}\",\r\n        \"scope\": [\"openid\"],\r\n        \"authorized_grant_types\": [\"authorization_code\",\"refresh_token\"],\r\n        \"redirect_uri\": \"urn:ietf:wg:oauth:2.0:oob\"\r\n       }"
+				},
+				"url": {
+					"raw": "{{sasserver}}/SASLogon/oauth/clients",
+					"host": [
+						"{{sasserver}}"
+					],
+					"path": [
+						"SASLogon",
+						"oauth",
+						"clients"
+					]
+				},
+				"description": "Use the Access Token to register the new client ID and secret"
+			},
+			"response": []
+		},
+		{
+			"name": "Get OAuth access token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"pm.environment.set(\"access_token\", jsonData.access_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{clientsecret}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{clientid}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{sasserver}}/SASLogon/oauth/token?grant_type=authorization_code&code=",
+					"host": [
+						"{{sasserver}}"
+					],
+					"path": [
+						"SASLogon",
+						"oauth",
+						"token"
+					],
+					"query": [
+						{
+							"key": "grant_type",
+							"value": "authorization_code"
+						},
+						{
+							"key": "code",
+							"value": ""
+						}
+					]
+				},
+				"description": "Acquire the OAuth access token of the Client ID using the authorization code."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "sasserver",
+			"value": "https://joe.hackinsas.vectorlabs.sas.com\n"
+		},
+		{
+			"key": "consul-token",
+			"value": "dd96be9c-447f-4ae9-ad76-4f83700df93d"
+		},
+		{
+			"key": "clientid",
+			"value": "hackclient"
+		},
+		{
+			"key": "clientsecret",
+			"value": "secret"
+		}
+	]
+}
