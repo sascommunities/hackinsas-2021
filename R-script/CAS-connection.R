@@ -1,5 +1,5 @@
 library(swat)
-conn <- swat::CAS('fred.hackinsas.vectorlabs.sas.com/cas-shared-default-http', 443, protocol='https', username='viya_admin', password='aloo2ej1Aophee')
+conn <- swat::CAS('<team-name>.hackinsas.vectorlabs.sas.com/cas-shared-default-http', 443, protocol='https', username='viya_admin', password='<your-password>')
 actionsets <- c('sampling', 'fedsql', 'decisionTree', 'neuralNet', 'percentile')
 
 for(i in actionsets){
